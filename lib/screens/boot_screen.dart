@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BootScreen extends StatefulWidget {
+  const BootScreen({super.key});
   @override
   _BootScreenState createState() => _BootScreenState();
 }

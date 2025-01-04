@@ -18,7 +18,7 @@ class LoginScreen extends StatelessWidget {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccessState) {
-            Navigator.pushNamed(context, '/dashboard');
+            Navigator.pushNamed(context, '/home');
           } else if (state is AuthFailureState) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error)),

@@ -19,7 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         if (storedEmail != null && storedPassword != null &&
             event.email == storedEmail && event.password == storedPassword) {
           emit(AuthSuccessState());
-          navigationBloc.add(NavigateToDashboard()); 
+          navigationBloc.add(NavigateToHome()); 
         } else {
           emit(AuthFailureState(error: "Invalid email or password"));
         }

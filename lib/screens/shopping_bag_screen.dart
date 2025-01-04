@@ -1,148 +1,251 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:book_heaven/blocs/shopping_bag/shopping_bag_bloc.dart';
+import 'package:book_heaven/blocs/shopping_bag/shopping_bag_state.dart';
+import 'package:book_heaven/blocs/shopping_bag/shopping_bag_event.dart';
 
 class ShoppingBagScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> cartItems;
-
-  ShoppingBagScreen({required this.cartItems});
+  const ShoppingBagScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    double subtotal = cartItems.fold(0, (sum, item) => sum + item['price'] * item['quantity']);
-    double shipping = 2.0;
-    double totalPayment = subtotal + shipping;
+    const double shippingFee = 2.0;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Bag'),
         centerTitle: true,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  final item = cartItems[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          item['image'],
-                          width: 50,
-                          height: 50,
-                          fit: BoxFit.cover,
-                        ),
-                       const  SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['title'],
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      body: BlocBuilder<ShoppingBagBloc, ShoppingBagState>(
+        builder: (context, state) {
+          if (state is ShoppingBagUpdatedState && state.bag.isNotEmpty) {
+            final bag = state.bag;
+            double subtotal = bag.entries
+                .map((entry) => entry.key.price * entry.value)
+                .fold(0.0, (prev, element) => prev + element);
+            double totalPayment = subtotal + shippingFee;
+
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: bag.length,
+                    itemBuilder: (context, index) {
+                      final product = bag.keys.elementAt(index);
+                      final quantity = bag[product]!;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8.0, horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.asset(
+                                product.image,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
                               ),
-                              Row(
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                    onPressed: () {
-                                    },
+                                  Text(
+                                    product.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  Text('${item['quantity']}'),
-                                  IconButton(
-                                    icon: const Icon(Icons.add_circle_outline),
-                                    onPressed: () {
-                                     
-                                    },
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          if (quantity > 1) {
+                                            context.read<ShoppingBagBloc>().add(
+                                                  AddToBagEvent(product, -1),
+                                                );
+                                          }
+                                        },
+                                        icon: const Icon(Icons.remove_circle),
+                                      ),
+                                      Text(
+                                        "$quantity",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          context.read<ShoppingBagBloc>().add(
+                                                AddToBagEvent(product, 1),
+                                              );
+                                        },
+                                        icon: const Icon(Icons.add_circle),
+                                      ),
+                                    ],
                                   ),
                                 ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "\$${(product.price * quantity).toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    context.read<ShoppingBagBloc>().add(
+                                          RemoveFromBagEvent(product),
+                                        );
+                                  },
+                                  child: const Text(
+                                    "Remove",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (var entry in bag.entries)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                entry.key.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                "\$${(entry.key.price * entry.value).toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        Text(
-                          '\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 16),
-                        GestureDetector(
-                          onTap: () {
-                            
-                          },
-                          child: const Text(
-                            'Remove',
-                            style: TextStyle(color: Colors.red, fontSize: 14),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Subtotal",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            "\$${subtotal.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Shipping",
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            "\$${shippingFee.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24, thickness: 1),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Total Payment",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            "\$${totalPayment.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            const Divider(),
-            ...cartItems.map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        item['title'],
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      Text(
-                        '\$${(item['price'] * item['quantity']).toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 14),
+                        child: const Center(
+                          child: Text(
+                            "Pay Now",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                )),
-            const Divider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Subtotal', style: TextStyle(fontSize: 16)),
-                Text('\$${subtotal.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Shipping', style: TextStyle(fontSize: 16)),
-                Text('\$${shipping.toStringAsFixed(2)}', style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Total Payment', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text('\$${totalPayment.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 ),
-                child: const Text('Pay Now'),
-              ),
-            ),
-          ],
-        ),
+              ],
+            );
+          } else {
+            return const Center(child: Text('Your bag is empty.'));
+          }
+        },
       ),
     );
   }

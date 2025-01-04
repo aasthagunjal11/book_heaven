@@ -1,172 +1,233 @@
 import 'package:flutter/material.dart';
-import 'shopping_bag_screen.dart'; 
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:book_heaven/model/product_model.dart';
+import 'package:book_heaven/blocs/product_details/product_details_bloc.dart';
+import 'package:book_heaven/blocs/product_details/product_details_event.dart';
+import 'package:book_heaven/blocs/product_details/product_details_state.dart';
+import 'package:book_heaven/blocs/shopping_bag/shopping_bag_bloc.dart';
+import 'package:book_heaven/blocs/shopping_bag/shopping_bag_event.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
-  final Map<String, dynamic> product;
-
-  ProductDetailsScreen({required this.product});
+class ProductDetailsScreen extends StatefulWidget {
+  const ProductDetailsScreen({super.key});
 
   @override
+  State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(product['title'] ?? 'Product Details'),
-        centerTitle: true,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Image.asset(
-                product['image'] ?? '',
-                width: 200,
-                height: 250,
-                fit: BoxFit.cover,
+    final product = ModalRoute.of(context)?.settings.arguments as Product?;
+
+    if (product == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Error")),
+        body: const Center(child: Text("Product details not available.")),
+      );
+    }
+
+    return BlocProvider(
+      create: (context) =>
+          ProductDetailsBloc()..add(LoadProductDetailsEvent(product)),
+      child: BlocBuilder<ProductDetailsBloc, ProductDetailsState>(
+        builder: (context, state) {
+          if (state is ProductDetailsLoadingState) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ProductDetailsLoadedState) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text("Book Heaven"),
+                centerTitle: true,
+                elevation: 0,
               ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 4,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      product['title'] ?? '',
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'GoodDay',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+              body: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          state.product.image,
+                          width: double.infinity,
+                          height: 250, 
+                          fit: BoxFit.contain, 
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      product['description'] ??
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-                      style: const TextStyle(fontSize: 14, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    const Row(
-                      children: [
-                        Text(
-                          'Review',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        SizedBox(width: 8),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star, color: Colors.amber, size: 20),
-                        Icon(Icons.star_half, color: Colors.amber, size: 20),
-                        Text(
-                          ' (4.0)',
-                          style: TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.remove_circle_outline),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              state.product.title,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const Text('1', style: TextStyle(fontSize: 16)),
-                            IconButton(
-                              onPressed: () {},
-                              icon: const Icon(Icons.add_circle_outline),
-                            ),
-                          ],
-                        ),
-                        Text(
-                          '\$${product['price'] ?? 'N/A'}',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
                           ),
+                          const Icon(
+                            Icons.favorite_border,
+                            color: Colors.red,
+                            size: 28,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        "GoodDay",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.orange,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShoppingBagScreen(
-                                  cartItems: [
-                                    {
-                                      'title': product['title'],
-                                      'price': double.parse(
-                                          product['price'].replaceAll('\$', '')),
-                                      'image': product['image'],
-                                      'quantity': 1,
-                                    }
-                                  ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.product.description,
+                        style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Text(
+                            "Review",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Row(
+                            children: List.generate(5, (index) {
+                              if (index < 4) {
+                                return const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 20,
+                                );
+                              } else {
+                                return const Icon(
+                                  Icons.star_border,
+                                  color: Colors.amber,
+                                  size: 20,
+                                );
+                              }
+                            }),
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            "4.0",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  context
+                                      .read<ProductDetailsBloc>()
+                                      .add(DecrementQuantityEvent());
+                                },
+                                icon: const Icon(Icons.remove_circle_outline),
+                              ),
+                              Text(
+                                "${state.quantity}",
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
+                              IconButton(
+                                onPressed: () {
+                                  context
+                                      .read<ProductDetailsBloc>()
+                                      .add(IncrementQuantityEvent());
+                                },
+                                icon: const Icon(Icons.add_circle_outline),
+                              ),
+                            ],
                           ),
-                          child: const Text('Add to bag'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ShoppingBagScreen(
-                                  cartItems: [
-                                    {
-                                      'title': product['title'],
-                                      'price': double.parse(
-                                          product['price'].replaceAll('\$', '')),
-                                      'image': product['image'],
-                                      'quantity': 1,
-                                    }
-                                  ],
+                          Text(
+                            "\$${(state.product.price * state.quantity).toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.read<ShoppingBagBloc>().add(
+                                  AddToBagEvent(state.product, state.quantity),
+                                );
+                                Navigator.pushNamed(context, '/shopping_bag'); 
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Colors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
+                              child: const Text(
+                                "Add to bag",
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
                           ),
-                          child: const Text('Buy Now'),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                context.read<ShoppingBagBloc>().add(
+                                  AddToBagEvent(state.product, state.quantity),
+                                );
+                                Navigator.pushNamed(context, '/shopping_bag');
+                              },
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Colors.orange,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text(
+                                "Buy Now",
+                                style: TextStyle(fontSize: 18, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            );
+          } else if (state is ProductDetailsErrorState) {
+            return const Center(child: Text('Failed to load product details'));
+          } else {
+            return const SizedBox.shrink();
+          }
+        },
       ),
     );
   }

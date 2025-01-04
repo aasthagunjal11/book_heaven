@@ -7,6 +7,6 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     on<NavigateToguide>((event, emit) => emit(GuideState()));
     on<NavigateToLogin>((event, emit) => emit(LoginState()));
     on<NavigateToRegister>((event, emit) => emit(RegisterationState()));
-    on<NavigateToDashboard>((event, emit) => emit(DashboardScreenState())); 
+    on<NavigateToHome>((event, emit) => emit(HomeScreenState())); 
   }
 }

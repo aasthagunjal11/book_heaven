@@ -1,67 +1,64 @@
 {
-    "specialOffer": {
-      "title": "Special Offer",
-      "description": "Discount 25%",
-      "image": "assets/images/apollo.png"
+  "specialOffer": {
+    "title": "Special Offer",
+    "description": "Discount 25%",
+    "image": "assets/images/apollo.png"
+  },
+  "topOfWeek": [
+    {
+      "title": "The Kite Runner",
+      "price": "$14.99",
+      "image": "assets/images/kite.png",
+      "description": "A gripping and emotional story of friendship, love, and redemption set against the backdrop of the political upheaval in Afghanistan."
     },
-    "topOfWeek": [
-      {
-        "title": "The Kite Runner",
-        "price": "$14.99",
-        "image": "assets/images/kite.png"
-      },
-      {
-        "title": "The Subtle Art of Not Giving...",
-        "price": "$29.99",
-        "image": "assets/images/subtle.png"
-      },
-      {
-        "title": "The Alchemist",
-        "price": "$14.99",
-        "image": "assets/images/alchemist.png"
-      }
-    ],
-    "vendors": [
-      {
-        
-        "image": "assets/images/warehouse.png"
-      },
-      {
-        
-        "image": "assets/images/kuromi.png"
-      },
-      {
-        "image": "assets/images/gooday.png"
-      },
-      {
-        
-        "image": "assets/images/Penguin.png"
-      },
-      {
-       
-        "image": "assets/images/walker.png"
-      },
-      {
-       
-        "image": "assets/images/quirk.png"
-      }
-    ],
-    "authors": [
-      {
-        "name": "John Freeman",
-        "role": "Writer",
-        "image": "assets/images/john.png"
-      },
-      {
-        "name": "Tess Gunty",
-        "role": "Novelist",
-        "image": "assets/images/tess.png"
-      },
-      {
-        "name": "Richard Perry",
-        "role": "Writer",
-        "image": "assets/images/richard.png"
-      }
-    ]
-  }
-  
+    {
+      "title": "The Subtle Art of Not Giving...",
+      "price": "$29.99",
+      "image": "assets/images/subtle.png",
+      "description": "A no-nonsense guide to living a better life by focusing on what really matters, and letting go of unnecessary stress and worry."
+    },
+    {
+      "title": "The Alchemist",
+      "price": "$14.99",
+      "image": "assets/images/alchemist.png",
+      "description": "A philosophical novel about following your dreams and the importance of pursuing your personal legend, no matter the obstacles."
+    }
+  ],
+  "vendors": [
+    {
+      "image": "assets/images/warehouse.png"
+    },
+    {
+      "image": "assets/images/kuromi.png"
+    },
+    {
+      "image": "assets/images/gooday.png"
+    },
+    {
+      "image": "assets/images/Penguin.png"
+    },
+    {
+      "image": "assets/images/walker.png"
+    },
+    {
+      "image": "assets/images/quirk.png"
+    }
+  ],
+  "authors": [
+    {
+      "name": "John Freeman",
+      "role": "Writer",
+      "image": "assets/images/john.png"
+    },
+    {
+      "name": "Tess Gunty",
+      "role": "Novelist",
+      "image": "assets/images/tess.png"
+    },
+    {
+      "name": "Richard Perry",
+      "role": "Writer",
+      "image": "assets/images/richard.png"
+    }
+  ]
+}
